@@ -5,23 +5,22 @@ const session = require('express-session');
 const passport = require('passport');
 const localStrategy = require('passport-local').Strategy;
 const multer = require('multer');
+const upload = multer({ dist: './uploads' });
 const flash = require('connect-flash');
+const expressValidator = require('express-validator');
 
 const routes = require('./routes/routes');
 
 const app = express();
 
-app.use(bodyParser.json());
-routes(app);
+
 // Middleware///
-// Handle file uploads
-app.use(multer({dest: './uploads'}));
 
 // Handle Sessions
 app.use(session({
-  seacret: 'seacret',
+  secret: 'secret',
   saveUninitialized: true,
-  resave: true;
+  resave: true
 }));
 
 // Passport
@@ -45,6 +44,14 @@ app.use(expressValidator({
     };
   }
 }));
+
+app.use(require('connect-flash')());
+app.use(function (req, res, next) {
+  res.locals.messages = require('express-messages')(req, res);
+  next();
+});
+app.use(bodyParser.json());
+routes(app);
 
 
 module.exports = app;
